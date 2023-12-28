@@ -1,0 +1,30 @@
+[project]
+name = "proteus"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "盐粒 Yanli", email = "mail@yanli.one"},
+]
+dependencies = [
+    "msgspec>=0.18.5",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+[project.scripts]
+"proteus_cli" = "proteus.server.cli_server:main"
+
+[tool.ruff]
+target-version = "py311"
+logger-objects = ["utils.logger.logger"]
+[tool.ruff.lint]
+select = ["E", "F", "G", "B", "I", "SIM", "TID", "PL", "RUF"]
+ignore = ["E501"]
+[tool.ruff.lint.isort]
+known-first-party = ["setulib_nt", "utils", "proteus"]
+[tool.ruff.pylint]
+max-args = 7
