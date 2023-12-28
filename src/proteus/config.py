@@ -1,10 +1,14 @@
 from pathlib import Path
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, Optional
 
 from msgspec import field
 
 from proteus.spec import MessagePrompt
-from utils.spec import StructSpec
+from proteus.utils.spec import StructSpec
+
+
+class GeminiConfig(StructSpec, kw_only=True, frozen=True):
+    model_name: str = "gemini-pro"
 
 
 class TestBackConfig(StructSpec, kw_only=True, frozen=True):
@@ -13,7 +17,7 @@ class TestBackConfig(StructSpec, kw_only=True, frozen=True):
 
 
 class OpenAIConfig(StructSpec, kw_only=True, frozen=True):
-    model: str
+    model: str = "gpt-3.5-turbo"
 
 
 class LlamaCppConfig(StructSpec, kw_only=True, frozen=True):
@@ -23,9 +27,10 @@ class LlamaCppConfig(StructSpec, kw_only=True, frozen=True):
 
 
 class BackendsConfig(StructSpec, kw_only=True, frozen=True):
-    openai: Optional[OpenAIConfig]
-    llama_cpp: Optional[LlamaCppConfig]
-    testback: Optional[TestBackConfig]
+    openai: Optional[OpenAIConfig] = None
+    llama_cpp: Optional[LlamaCppConfig] = None
+    testback: Optional[TestBackConfig] = None
+    gemini: Optional[GeminiConfig] = None
 
     @classmethod
     def from_path(cls, path: Path) -> "BackendsConfig":
@@ -43,3 +48,7 @@ class PromptsConfig(StructSpec, kw_only=True, frozen=True):
                 prompt_path.read_bytes()
             )
         return cls(prompts=prompts)
+
+
+class ManagerConfig(StructSpec, kw_only=True, frozen=True):
+    live_history_size: int = 0

@@ -1,6 +1,7 @@
 from typing import Dict
 
-from proteus.config import BackendsConfig, PromptsConfig
+from proteus.config import BackendsConfig, ManagerConfig, PromptsConfig
+from proteus.history_store import BaseHistoryStore
 from proteus.llms import BaseLLM, llm_from_config
 from proteus.talker import ProteusTalker
 
@@ -19,24 +20,35 @@ class TalkerStore:
 
 
 class ProteusManager:
-    llm: BaseLLM
     backends_conf: BackendsConfig
     prompts_conf: PromptsConfig
+    manager_conf: ManagerConfig
+    llm: BaseLLM
     talker_store: TalkerStore
+    history_store: BaseHistoryStore
 
     def __init__(
-        self, llm_name: str, backends_conf: BackendsConfig, prompts_conf: PromptsConfig
+        self,
+        backends_conf: BackendsConfig,
+        prompts_conf: PromptsConfig,
+        manager_conf: ManagerConfig,
+        llm_name: str,
+        history_store: BaseHistoryStore,
     ) -> None:
-        self.llm = llm_from_config(llm_name, backends_conf)
         self.backends_conf = backends_conf
         self.prompts_conf = prompts_conf
+        self.manager_conf = manager_conf
+        self.llm = llm_from_config(llm_name, backends_conf)
         self.talker_store = TalkerStore()
+        self.history_store = history_store
 
     def new_talker(self, prompt_name: str) -> int:
         talker = ProteusTalker.from_new(
-            prompt_name,
-            self.prompts_conf,
-            self.llm,
+            prompt_name=prompt_name,
+            prompts_config=self.prompts_conf,
+            llm=self.llm,
+            history_store=self.history_store,
+            live_history_size=self.manager_conf.live_history_size,
         )
         self.talker_store.append(talker)
         return talker.state.id

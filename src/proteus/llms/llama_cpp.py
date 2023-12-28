@@ -4,7 +4,7 @@ from llama_cpp import Llama
 
 from proteus.config import BackendsConfig
 from proteus.llms.base import BaseLLM
-from proteus.spec import Message, LLMResponse
+from proteus.spec import LLMResponse, Message
 
 
 class LlamaCppLLM(BaseLLM):
@@ -20,7 +20,10 @@ class LlamaCppLLM(BaseLLM):
             **self.config.model_extra,
         )
 
-    async def request(self, messages: List[Message]) -> LLMResponse:
+    async def arequest(self, messages: List[Message]) -> LLMResponse:
+        return self.request(messages)
+
+    def request(self, messages: List[Message]) -> LLMResponse:
         completion = self._llm.create_chat_completion(
             [m.to_dict() for m in messages],
             **self.config.completion_extra,

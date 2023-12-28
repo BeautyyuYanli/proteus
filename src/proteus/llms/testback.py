@@ -11,7 +11,7 @@ from transformers import (
 
 from proteus.config import BackendsConfig
 from proteus.llms.base import BaseLLM
-from proteus.spec import Message, LLMResponse
+from proteus.spec import LLMResponse, Message
 
 
 class TestBackLLM(BaseLLM):
@@ -46,7 +46,10 @@ class TestBackLLM(BaseLLM):
             tokenizer=self.tokenizer,
         )
 
-    async def request(self, messages: List[Message]) -> LLMResponse:
+    async def arequest(self, messages: List[Message]) -> LLMResponse:
+        return self.request(messages)
+
+    def request(self, messages: List[Message]) -> LLMResponse:
         prompt = self.tokenizer.apply_chat_template(
             messages,
             tokenize=False,

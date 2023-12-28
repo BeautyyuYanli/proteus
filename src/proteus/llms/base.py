@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from proteus.config import BackendsConfig
-from proteus.spec import Message, LLMResponse
+from proteus.spec import LLMResponse, Message
 
 
 class BaseLLM(ABC):
@@ -14,5 +14,9 @@ class BaseLLM(ABC):
         ...
 
     @abstractmethod
-    async def request(self, messages: List[Message]) -> LLMResponse:
+    async def arequest(self, messages: List[Message]) -> LLMResponse:
+        ...
+
+    @abstractmethod
+    def request(self, messages: List[Message]) -> LLMResponse:
         ...

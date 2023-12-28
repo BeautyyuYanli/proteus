@@ -1,4 +1,4 @@
-from typing import Dict, List, Callable
+from typing import Callable, Dict
 
 from proteus.config import BackendsConfig
 from proteus.llms.base import BaseLLM
@@ -20,10 +20,16 @@ def llm_from_config(name: str, config: BackendsConfig) -> "BaseLLM":
 
         return TestBackLLM
 
+    def import_gemini():
+        from proteus.llms.gemini import GeminiLLM
+
+        return GeminiLLM
+
     _llm_name_map: Dict[str, Callable[[], BaseLLM]] = {
         "openai": import_openai,
         "llama_cpp": import_llama_cpp,
         "testback": import_testback,
+        "gemini": import_gemini,
     }
     return _llm_name_map[name]()(config)
 
