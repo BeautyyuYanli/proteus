@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:c1a3abb4e771363d2dbfcbd08e51b28a5cc87c994e5fb1878a7313b9e63aa35b"
+content_hash = "sha256:fe707d6896152214b7328c42b0703026b4764de963568968d5041f4087ce6844"
 
 [[package]]
 name = "msgspec"
@@ -28,4 +28,14 @@ files = [
     {file = "msgspec-0.18.5-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:b491b2549d22e11d7cfe34a231f9bd006cb6b71adefa070a070075d2f601e75c"},
     {file = "msgspec-0.18.5-cp312-cp312-win_amd64.whl", hash = "sha256:c79e7115f0143688c5d866359e7b6b76dd1581a81c9aeac7805a9d6320e9f2ca"},
     {file = "msgspec-0.18.5.tar.gz", hash = "sha256:8e545651531f2d01b983d0ac0c7f3b6d99674267ff261b5f344f5016160b5608"},
+]
+
+[[package]]
+name = "xdg"
+version = "6.0.0"
+requires_python = ">=3.7,<4.0"
+summary = "Variables defined by the XDG Base Directory Specification"
+files = [
+    {file = "xdg-6.0.0-py3-none-any.whl", hash = "sha256:df3510755b4395157fc04fc3b02467c777f3b3ca383257397f09ab0d4c16f936"},
+    {file = "xdg-6.0.0.tar.gz", hash = "sha256:24278094f2d45e846d1eb28a2ebb92d7b67fc0cab5249ee3ce88c95f649a1c92"},
 ]

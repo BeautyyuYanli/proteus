@@ -9,19 +9,17 @@ from transformers import (
     pipeline,
 )
 
-from proteus.config import BackendsConfig
+from proteus.config import LLMsConfig
 from proteus.llms.base import BaseLLM
-from proteus.spec import LLMResponse, Message
+from proteus.spec import ProteusLLMResponse, ProteusMessage
 
 
 class TestBackLLM(BaseLLM):
     def __init__(
         self,
-        config: BackendsConfig,
+        config: LLMsConfig.TestBackConfig,
     ) -> None:
-        if config.testback is None:
-            raise ValueError("TestBack args not set")
-        self.config = config.testback
+        self.config = config
 
         model: MistralForCausalLM = AutoModelForCausalLM.from_pretrained(
             self.config.model,
@@ -46,10 +44,10 @@ class TestBackLLM(BaseLLM):
             tokenizer=self.tokenizer,
         )
 
-    async def arequest(self, messages: List[Message]) -> LLMResponse:
+    async def arequest(self, messages: List[ProteusMessage]) -> ProteusLLMResponse:
         return self.request(messages)
 
-    def request(self, messages: List[Message]) -> LLMResponse:
+    def request(self, messages: List[ProteusMessage]) -> ProteusLLMResponse:
         prompt = self.tokenizer.apply_chat_template(
             messages,
             tokenize=False,
@@ -61,7 +59,7 @@ class TestBackLLM(BaseLLM):
             return_full_text=False,
             **self.config.completion_extra,
         )[0]["generated_text"]
-        return LLMResponse(
-            message=Message(role="assistant", content=str(output)),
+        return ProteusLLMResponse(
+            message=ProteusMessage(role="assistant", content=str(output)),
             token_cnt=None,
         )

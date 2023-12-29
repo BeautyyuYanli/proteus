@@ -3,23 +3,21 @@ from typing import List, cast
 import openai
 from openai.types.chat import ChatCompletion, ChatCompletionMessageParam
 
-from proteus.config import BackendsConfig
+from proteus.config import LLMsConfig
 from proteus.llms.base import BaseLLM
-from proteus.spec import LLMResponse, Message
+from proteus.spec import ProteusLLMResponse, ProteusMessage
 
 
 class OpenAILLM(BaseLLM):
     def __init__(
         self,
-        config: BackendsConfig,
+        config: LLMsConfig.OpenAIConfig,
     ) -> None:
-        if config.openai is None:
-            raise ValueError("OpenAI args not set")
-        self.config = config.openai
+        self.config = config
         self._allm = openai.AsyncOpenAI().chat.completions
         self._llm = openai.OpenAI().chat.completions
 
-    async def arequest(self, messages: List[Message]) -> LLMResponse:
+    async def arequest(self, messages: List[ProteusMessage]) -> ProteusLLMResponse:
         completion: ChatCompletion = await self._allm.create(
             messages=cast(
                 List[ChatCompletionMessageParam], [m.to_dict() for m in messages]
@@ -28,14 +26,14 @@ class OpenAILLM(BaseLLM):
         )
         if not isinstance(completion, ChatCompletion):
             raise TypeError("OpenAI returned an unexpected type")
-        return LLMResponse(
-            message=Message.from_any(completion.choices[0].message),
+        return ProteusLLMResponse(
+            message=ProteusMessage.from_any(completion.choices[0].message),
             token_cnt=None
             if completion.usage is None
             else completion.usage.completion_tokens,
         )
 
-    async def request(self, messages: List[Message]) -> LLMResponse:
+    async def request(self, messages: List[ProteusMessage]) -> ProteusLLMResponse:
         completion: ChatCompletion = self._llm.create(
             messages=cast(
                 List[ChatCompletionMessageParam], [m.to_dict() for m in messages]
@@ -44,8 +42,8 @@ class OpenAILLM(BaseLLM):
         )
         if not isinstance(completion, ChatCompletion):
             raise TypeError("OpenAI returned an unexpected type")
-        return LLMResponse(
-            message=Message.from_any(completion.choices[0].message),
+        return ProteusLLMResponse(
+            message=ProteusMessage.from_any(completion.choices[0].message),
             token_cnt=None
             if completion.usage is None
             else completion.usage.completion_tokens,

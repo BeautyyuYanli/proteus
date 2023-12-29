@@ -1,10 +1,10 @@
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 
-from proteus.config import BackendsConfig
+from proteus.config import LLMsConfig, LLMsName
 from proteus.llms.base import BaseLLM
 
 
-def llm_from_config(name: str, config: BackendsConfig) -> "BaseLLM":
+def llm_from_config(config: LLMsConfig, name: Optional[LLMsName] = None) -> BaseLLM:
     def import_openai():
         from proteus.llms.openai import OpenAILLM
 
@@ -31,7 +31,14 @@ def llm_from_config(name: str, config: BackendsConfig) -> "BaseLLM":
         "testback": import_testback,
         "gemini": import_gemini,
     }
-    return _llm_name_map[name]()(config)
+
+    if name is not None:
+        return _llm_name_map[name]()(getattr(config, name))
+
+    for k, v in _llm_name_map.items():
+        if getattr(config, k) is not None:
+            return v()(getattr(config, k))
+    raise ValueError("No LLMs config provided")
 
 
-__all__ = ["llm_from_config"]
+__all__ = ["llm_from_config", "BaseLLM"]

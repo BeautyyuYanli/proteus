@@ -5,17 +5,17 @@ from msgspec import field
 from proteus.utils.spec import StructSpec
 
 
-class Message(StructSpec, kw_only=True, frozen=True):
+class ProteusMessage(StructSpec, kw_only=True, frozen=True):
     role: Literal["system", "user", "assistant"]
     content: str
 
 
-class MessagePrompt(StructSpec, kw_only=True, frozen=True):
-    identity: List[Message] = field(default_factory=list)
-    examples: List[Message] = field(default_factory=list)
-    instruct: List[Message] = field(default_factory=list)
+class ProteusMessagePrompt(StructSpec, kw_only=True, frozen=True):
+    identity: List[ProteusMessage] = field(default_factory=list)
+    examples: List[ProteusMessage] = field(default_factory=list)
+    instruct: List[ProteusMessage] = field(default_factory=list)
 
 
-class LLMResponse(StructSpec, kw_only=True, frozen=True):
-    message: Message
+class ProteusLLMResponse(StructSpec, kw_only=True, frozen=True):
+    message: ProteusMessage
     token_cnt: Optional[int] = None

@@ -3,19 +3,17 @@ from typing import List
 import google.generativeai as genai
 from google.generativeai.types import ContentDict
 
-from proteus.config import BackendsConfig
+from proteus.config import LLMsConfig
 from proteus.llms.base import BaseLLM
-from proteus.spec import LLMResponse, Message
+from proteus.spec import ProteusLLMResponse, ProteusMessage
 
 
 class GeminiLLM(BaseLLM):
     def __init__(
         self,
-        config: BackendsConfig,
+        config: LLMsConfig.GeminiConfig,
     ) -> None:
-        if config.gemini is None:
-            raise ValueError("Gemini args not set")
-        self.config = config.gemini
+        self.config = config
         self._llm = genai.GenerativeModel(
             model_name=self.config.model_name,
             safety_settings=[
@@ -38,7 +36,7 @@ class GeminiLLM(BaseLLM):
             ],
         )
 
-    def _adapt_to_gemini(self, messages: List[Message]) -> List[ContentDict]:
+    def _adapt_to_gemini(self, messages: List[ProteusMessage]) -> List[ContentDict]:
         contents: List[ContentDict] = [
             {
                 "parts": [m.content],
@@ -54,23 +52,23 @@ class GeminiLLM(BaseLLM):
                 new_contents.append(i)
         return new_contents
 
-    async def arequest(self, messages: List[Message]) -> LLMResponse:
+    async def arequest(self, messages: List[ProteusMessage]) -> ProteusLLMResponse:
         completion = await self._llm.generate_content_async(
             self._adapt_to_gemini(messages),
         )
 
-        return LLMResponse(
-            message=Message(role="assistant", content=completion.text),
+        return ProteusLLMResponse(
+            message=ProteusMessage(role="assistant", content=completion.text),
             # token_cnt=completion.candidates[0].token_count,
         )
 
-    def request(self, messages: List[Message]) -> LLMResponse:
+    def request(self, messages: List[ProteusMessage]) -> ProteusLLMResponse:
         completion = self._llm.generate_content(
             self._adapt_to_gemini(messages),
         )
 
-        return LLMResponse(
-            message=Message(role="assistant", content=completion.text),
+        return ProteusLLMResponse(
+            message=ProteusMessage(role="assistant", content=completion.text),
             # token_cnt=completion.candidates[0].token_count,
         )
 

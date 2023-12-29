@@ -7,6 +7,7 @@ authors = [
 ]
 dependencies = [
     "msgspec>=0.18.5",
+    "xdg>=6.0.0",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
@@ -23,7 +24,7 @@ target-version = "py311"
 logger-objects = ["utils.logger.logger"]
 [tool.ruff.lint]
 select = ["E", "F", "G", "B", "I", "SIM", "TID", "PL", "RUF"]
-ignore = ["E501"]
+ignore = ["E501", "RUF001"]
 [tool.ruff.lint.isort]
 known-first-party = ["setulib_nt", "utils", "proteus"]
 [tool.ruff.pylint]
