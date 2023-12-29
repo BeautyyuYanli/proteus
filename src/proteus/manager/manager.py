@@ -32,9 +32,10 @@ class ProteusManager:
         self.manager_conf = manager_conf
         self.llm = llm_from_config(llms_conf, llm_name)
         self.talker_store = TalkerStore(
+            manager_conf.cache_talkers_mem_capacity,
             cache_folder=Path(manager_conf.cache_folder) / "talkers"
             if manager_conf.cache_talkers_enabled
-            else None
+            else None,
         )
         self.history_store = (
             FileHistoryStore(Path(manager_conf.cache_folder) / "history")
@@ -52,7 +53,7 @@ class ProteusManager:
             persist=self.talker_store.persist,
         )
         self.talker_store.append(talker)
-        return talker._state.id
+        return talker.state.id
 
     def get_talker(self, proteus_id: str) -> ProteusTalker:
         return self.talker_store.get(proteus_id)

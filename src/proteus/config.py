@@ -50,10 +50,19 @@ class PromptsConfig(StructSpec, kw_only=True, frozen=True):
 
 
 class ManagerConfig(StructSpec, kw_only=True, frozen=True):
+    """
+    live_history_size: size of live history (context window size)
+    cache_folder: cache folder
+    cache_history_enabled: whether to cache all history of all talkers
+    cache_talkers_enabled: whether to cache states of all talkers, which can be used to resume a manager
+    cache_talkers_mem_capacity: capacity of talker cache in memory. -1 means unlimited. If exceeded, the least recently used talker will be saved to cache_folder, or discarded if cache_history_enabled is False.
+    """
+
     live_history_size: int = 0
     cache_folder: str = str(XDG_CACHE_HOME / "proteus")
     cache_history_enabled: bool = False
     cache_talkers_enabled: bool = False
+    cache_talkers_mem_capacity: int = -1
 
     @classmethod
     def from_path(cls, path: Path) -> "ManagerConfig":

@@ -34,7 +34,8 @@ def main():
         llms_conf=LLMsConfig.from_path(Path(args.llms_configs)),
         prompts_conf=PromptsConfig.from_path(Path(args.prompts_configs)),
         manager_conf=ManagerConfig(
-            live_history_size=5, cache_history_enabled=True, cache_talkers_enabled=True
+            live_history_size=5,
+            cache_history_enabled=True,
         ),
         llm_name=args.llm_name,
     )
@@ -44,6 +45,8 @@ def main():
         try:
             user_input = input("User: ")
             print(f"{args.prompt_name}: {talker.say(user_input)}")
+        except KeyboardInterrupt:
+            break
         except Exception as e:
             talker.save()
             raise e

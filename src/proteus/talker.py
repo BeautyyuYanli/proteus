@@ -16,7 +16,7 @@ class ProteusTalkerState(StructSpec, kw_only=True, frozen=True):
 
 
 class ProteusTalker:
-    _state: ProteusTalkerState
+    state: ProteusTalkerState
     _state_lock: Lock
     _prompts_config: PromptsConfig
     _llm: BaseLLM
@@ -42,7 +42,7 @@ class ProteusTalker:
 
     def _finish_init(self) -> None:
         self._state_lock = Lock()
-        self._prompt = self._prompts_config.prompts[self._state.prompt_name]
+        self._prompt = self._prompts_config.prompts[self.state.prompt_name]
         finalize(self, self.save)
 
     @classmethod
@@ -57,7 +57,7 @@ class ProteusTalker:
     ) -> Self:
         _self = cls()
         # state things that can be serialized
-        _self._state = ProteusTalkerState(
+        _self.state = ProteusTalkerState(
             id=uuid4().hex,
             prompt_name=prompt_name,
             live_history=[],
@@ -71,22 +71,26 @@ class ProteusTalker:
 
         return _self
 
-    # @classmethod
-    # def from_json(
-    #     cls,
-    #     state_json: bytes,
-    #     prompt_config: PromptsConfig,
-    #     llm: BaseLLM,
-    #     history_store: Optional[BaseHistoryStore] = None,
-    # ) -> Self:
-    #     _self = cls()
-    #     _self.state = ProteusTalkerState.from_json(state_json)
-    #     _self.prompts_config = prompt_config
-    #     _self.llm = llm
-    #     _self.history_store = history_store or FakeHistoryStore()
-    #     _self._finish_init()
+    @classmethod
+    def from_json(
+        cls,
+        state_json: bytes,
+        prompt_config: PromptsConfig,
+        llm: BaseLLM,
+        live_history_size: int = 0,
+        save_history: Callable[[str, List[ProteusMessage]], None] = lambda *args: None,
+        persist: Callable[[str, bytes], None] = lambda *args: None,
+    ) -> Self:
+        _self = cls()
+        _self.state = ProteusTalkerState.from_json(state_json)
+        _self._prompts_config = prompt_config
+        _self._llm = llm
+        _self._live_history_size = live_history_size
+        _self._save_history = save_history
+        _self._persist = persist
+        _self._finish_init()
 
-    #     return _self
+        return _self
 
     def _construct_prompt_msgs(
         self, new_inputs: List[ProteusMessage]
@@ -96,16 +100,16 @@ class ProteusTalker:
                 self._prompt.identity
                 + self._prompt.instruct
                 + self._prompt.examples
-                + self._state.live_history
+                + self.state.live_history
                 + new_inputs
             )
 
     def _extend_history(self, new_turn: List[ProteusMessage]) -> None:
         with self._state_lock:
-            self._state.live_history.extend(new_turn)
-            while len(self._state.live_history) > self._live_history_size:
-                self._state.live_history.pop(0)
-            self._save_history(self._state.id, new_turn)
+            self.state.live_history.extend(new_turn)
+            while len(self.state.live_history) > self._live_history_size:
+                self.state.live_history.pop(0)
+            self._save_history(self.state.id, new_turn)
 
     async def asay(self, user_input) -> str:
         new_turn = [ProteusMessage(role="user", content=user_input)]
@@ -125,11 +129,11 @@ class ProteusTalker:
 
     def clear(self) -> None:
         with self._state_lock:
-            self._state.live_history = []
+            self.state.live_history = []
 
     def save(self) -> None:
         with self._state_lock:
-            self._persist(self._state.id, self._state.to_json())
+            self._persist(self.state.id, self.state.to_json())
 
 
 __all__ = ["ProteusTalker"]
