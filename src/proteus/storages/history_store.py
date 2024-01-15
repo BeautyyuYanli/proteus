@@ -75,7 +75,7 @@ class PGHistoryStore(BaseHistoryStore):
         self._conn_pool = conn_pool
         with self._conn_pool.connection() as conn:
             create_table_query = """
-CREATE TABLE IF NOT EXISTS chat_history (
+CREATE TABLE IF NOT EXISTS proteus_chat_history (
     MESSAGE_ID      SERIAL  PRIMARY  KEY,
     SESSION_ID      TEXT    NOT NULL,
     ROLE            TEXT    NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS chat_history (
 ); """
             conn.execute(create_table_query)
             conn.execute(
-                "CREATE INDEX IF NOT EXISTS index_session_id ON chat_history (SESSION_ID);"
+                "CREATE INDEX IF NOT EXISTS index_session_id ON proteus_chat_history (SESSION_ID);"
             )
             conn.commit()
 
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS chat_history (
         with self._conn_pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.executemany(
-                    "INSERT INTO chat_history (SESSION_ID, ROLE, CONTENT) VALUES (%s, %s, %s)",
+                    "INSERT INTO proteus_chat_history (SESSION_ID, ROLE, CONTENT) VALUES (%s, %s, %s)",
                     [(session_id, m.role, m.content) for m in msg],
                 )
             conn.commit()
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS chat_history (
     def get_k(self, session_id: str, k: int) -> List[ProteusMessage]:
         with self._conn_pool.connection() as conn, conn.cursor() as cur:
             cur.execute(
-                "SELECT ROLE, CONTENT FROM chat_history WHERE SESSION_ID = %s ORDER BY MESSAGE_ID DESC LIMIT %s",
+                "SELECT ROLE, CONTENT FROM proteus_chat_history WHERE SESSION_ID = %s ORDER BY MESSAGE_ID DESC LIMIT %s",
                 (session_id, k),
             )
             retrieved = [
