@@ -1,8 +1,10 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-from proteus.config import LLMsConfig, ManagerConfig, PromptsConfig
-from proteus import ProteusManager
+from proteus.config import LLMsConfig, PromptsConfig
+from proteus.llms import llm_from_config
+from proteus.storages.history_store import MemoryHistoryStore
+from proteus.teller import ProteusTeller
 from proteus.utils.logger import logger
 from proteus.utils.spec import StructSpec
 
@@ -30,26 +32,20 @@ def args_parse() -> Arguments:
 
 def main():
     args = args_parse()
-    manager = ProteusManager(
-        llms_conf=LLMsConfig.from_path(Path(args.llms_configs)),
-        prompts_conf=PromptsConfig.from_path(Path(args.prompts_configs)),
-        manager_conf=ManagerConfig(
-            live_history_size=5,
-            cache_history_enabled=True,
+    teller = ProteusTeller(
+        id="cli",
+        llm=llm_from_config(
+            LLMsConfig.from_path(Path(args.llms_configs)), args.llm_name
         ),
-        llm_name=args.llm_name,
+        prompt=PromptsConfig.from_path(Path(args.prompts_configs)).prompts[
+            args.prompt_name
+        ],
+        history=MemoryHistoryStore(args.live_history_size),
+        live_history_size=args.live_history_size,
     )
-    talker_id = manager.new_talker(args.prompt_name)
-    talker = manager.get_talker(talker_id)
     while True:
-        try:
-            user_input = input("User: ")
-            print(f"{args.prompt_name}: {talker.say(user_input)}")
-        except KeyboardInterrupt:
-            break
-        except Exception as e:
-            talker.save()
-            raise e
+        user_input = input("User: ")
+        print(f"{args.prompt_name}: {teller.say(user_input)}")
 
 
 if __name__ == "__main__":

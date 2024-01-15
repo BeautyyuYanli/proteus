@@ -33,7 +33,7 @@ class OpenAILLM(BaseLLM):
             else completion.usage.completion_tokens,
         )
 
-    async def request(self, messages: List[ProteusMessage]) -> ProteusLLMResponse:
+    def request(self, messages: List[ProteusMessage]) -> ProteusLLMResponse:
         completion: ChatCompletion = self._llm.create(
             messages=cast(
                 List[ChatCompletionMessageParam], [m.to_dict() for m in messages]

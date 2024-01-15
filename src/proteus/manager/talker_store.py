@@ -1,9 +1,9 @@
+from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, Optional
+from threading import Lock
+from typing import Optional, Union
 
 from proteus.talker import ProteusTalker
-from collections import OrderedDict
-from threading import Lock
 
 
 class TalkerStorePersisted:
@@ -41,18 +41,18 @@ class TalkerStore:
             while self._capacity > 0 and len(self._store) > self._capacity:
                 self._store.popitem(last=False)
 
-    def get(self, talker_id: str) -> ProteusTalker:
+    def get(self, talker_id: str) -> Union[ProteusTalker, bytes]:
         with self._store_lock:
             if talker_id not in self._store:
                 if self._persisted:
                     try:
                         talker_state = self._persisted.get(talker_id)
-                    except FileNotFoundError:
-                        raise KeyError(f"Talker {talker_id} not found.")
-                    talker = ProteusTalker.from_json(talker_state)
-                    self._store[talker_id] = talker
+                    except FileNotFoundError as e:
+                        raise KeyError(f"Talker {talker_id} not found.") from e
+                    return talker_state
                 else:
                     raise KeyError(f"Talker {talker_id} not found.")
+
             self._store.move_to_end(talker_id)
             while self._capacity > 0 and len(self._store) > self._capacity:
                 self._store.popitem(last=False)
@@ -64,3 +64,9 @@ class TalkerStore:
         with self._store_lock:
             if talker_id in self._store:
                 self._store[talker_id].state = talker_state
+
+    def persist_all(self) -> None:
+        if self._persisted:
+            with self._store_lock:
+                for talker_id, talker in self._store.items():
+                    self._persisted.upsert(talker_id, talker.state.to_json())

@@ -1,11 +1,15 @@
-from proteus import ProteusTalker
 from proteus.config import LLMsConfig
+from proteus.llms import llm_from_config
 from proteus.spec import ProteusMessagePrompt
+from proteus.storages.history_store import MemoryHistoryStore
+from proteus.teller import ProteusTeller
 
 
 def main():
-    talker = ProteusTalker.create(
-        message_prompt=ProteusMessagePrompt.from_dict(
+    talker = ProteusTeller(
+        id="example",
+        llm=llm_from_config(LLMsConfig(gemini=LLMsConfig.GeminiConfig())),
+        prompt=ProteusMessagePrompt.from_dict(
             {
                 "identity": [
                     {
@@ -27,8 +31,8 @@ def main():
                 ],
             }
         ),
-        llms_config=LLMsConfig(gemini=LLMsConfig.GeminiConfig()),
-        live_history_size=5,
+        history=MemoryHistoryStore(10),
+        live_history_size=10,
     )
 
     while True:

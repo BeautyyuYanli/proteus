@@ -25,11 +25,29 @@ def llm_from_config(config: LLMsConfig, name: Optional[LLMsName] = None) -> Base
 
         return GeminiLLM
 
+    def import_dashscope():
+        from proteus.llms.dashscope import DashScopeLLM
+
+        return DashScopeLLM
+
+    def import_mixtral_ins():
+        from proteus.llms.replicate_mixtral_ins import ReplicateMixtralInsLLM
+
+        return ReplicateMixtralInsLLM
+
+    def import_qwen14():
+        from proteus.llms.replicate_qwen_14b import ReplicateQwen14LLM
+
+        return ReplicateQwen14LLM
+
     _llm_name_map: Dict[str, Callable[[], BaseLLM]] = {
         "openai": import_openai,
         "llama_cpp": import_llama_cpp,
         "testback": import_testback,
         "gemini": import_gemini,
+        "dashscope": import_dashscope,
+        "mixtral_ins": import_mixtral_ins,
+        "qwen14": import_qwen14,
     }
 
     if name is not None:

@@ -3,12 +3,12 @@ from typing import Optional
 
 from proteus.config import LLMsConfig, LLMsName, ManagerConfig, PromptsConfig
 from proteus.llms import BaseLLM, llm_from_config
-from proteus.manager.history_store import (
+from proteus.manager.talker_store import TalkerStore
+from proteus.storages.history_store import (
     BaseHistoryStore,
     FakeHistoryStore,
     FileHistoryStore,
 )
-from proteus.manager.talker_store import TalkerStore
 from proteus.talker import ProteusTalker
 
 
@@ -43,7 +43,7 @@ class ProteusManager:
             else FakeHistoryStore()
         )
 
-    def new_talker(self, prompt_name: str) -> int:
+    def new_talker(self, prompt_name: str) -> str:
         talker = ProteusTalker.from_new(
             prompt_name=prompt_name,
             prompts_config=self.prompts_conf,
@@ -55,5 +55,22 @@ class ProteusManager:
         self.talker_store.append(talker)
         return talker.state.id
 
-    def get_talker(self, proteus_id: str) -> ProteusTalker:
-        return self.talker_store.get(proteus_id)
+    def get_talker(self, proteus_id: str) -> Optional[ProteusTalker]:
+        try:
+            talker = self.talker_store.get(proteus_id)
+            if isinstance(talker, bytes):
+                talker = ProteusTalker.from_json(
+                    talker,
+                    self.prompts_conf,
+                    self.llm,
+                    self.manager_conf.live_history_size,
+                    self.history_store.extend,
+                    self.talker_store.persist,
+                )
+                self.talker_store.append(talker)
+            return talker
+        except KeyError:
+            return None
+
+    def save_all_talkers(self):
+        self.talker_store.persist_all()

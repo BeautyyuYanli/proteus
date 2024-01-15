@@ -129,7 +129,7 @@ class ProteusTalker:
 
     def clear(self) -> None:
         with self._state_lock:
-            self.state.live_history = []
+            self.state.live_history.clear()
 
     def save(self) -> None:
         with self._state_lock:
