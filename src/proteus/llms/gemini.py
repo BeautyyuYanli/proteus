@@ -34,6 +34,7 @@ class GeminiLLM(BaseLLM):
                     "threshold": "BLOCK_NONE",
                 },
             ],
+            generation_config=genai.GenerationConfig(**self.config.generation_config),
         )
 
     def _adapt_to_gemini(self, messages: List[ProteusMessage]) -> List[ContentDict]:

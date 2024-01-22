@@ -29,10 +29,10 @@ class ProteusFactory:
     def get_teller(
         self, id: str, prompt_name: str, live_history_size: int = 8
     ) -> Optional[ProteusTeller]:
-        ProteusTeller(
+        return ProteusTeller(
             id,
             llm=self._llm,
-            prompt=prompt_name,
+            prompt=self._prompts_conf.prompts[prompt_name],
             history=PGHistoryStore(self._pg_conn_pool),
             live_history_size=live_history_size,
         )

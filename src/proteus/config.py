@@ -13,6 +13,7 @@ LLMsName = Literal["openai", "llama_cpp", "testback", "gemini", "dashscope"]
 class LLMsConfig(StructSpec, kw_only=True, frozen=True):
     class GeminiConfig(StructSpec, kw_only=True, frozen=True):
         model_name: str = "gemini-pro"
+        generation_config: Dict[str, Any] = field(default_factory=dict)
 
     class TestBackConfig(StructSpec, kw_only=True, frozen=True):
         model: str

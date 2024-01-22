@@ -107,4 +107,4 @@ CREATE TABLE IF NOT EXISTS proteus_chat_history (
                 for role, content in cur.fetchall()
             ]
             retrieved.reverse()
-            return retrieved
+        return retrieved
