@@ -40,18 +40,14 @@ class ProteusTeller:
             + new_inputs
         )
 
-    async def asay(self, user_input) -> str:
-        new_turn = [ProteusMessage(role="user", content=user_input)]
-        msgs = self.construct_prompt_msgs(new_inputs=new_turn)
-        resp = await self._llm.arequest(msgs)
-        new_turn.append(resp.message)
-        self._history.extend(self.id, new_turn)
-        return resp.message.content
-
-    def say(self, user_input) -> str:
+    def say(self, user_input: str) -> str:
         new_turn = [ProteusMessage(role="user", content=user_input)]
         msgs = self.construct_prompt_msgs(new_inputs=new_turn)
         resp = self._llm.request(msgs)
         new_turn.append(resp.message)
         self._history.extend(self.id, new_turn)
         return resp.message.content
+
+    def say_with_template(self, user_input: str, template_name: str) -> str:
+        temp_input = self._prompt.templates.get(template_name, "{input}")
+        return self.say(temp_input.format(input=user_input))

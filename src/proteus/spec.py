@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import Dict, List, Literal, Optional
 
 from msgspec import field
 
@@ -14,6 +14,7 @@ class ProteusMessagePrompt(StructSpec, kw_only=True, frozen=True):
     identity: List[ProteusMessage] = field(default_factory=list)
     examples: List[ProteusMessage] = field(default_factory=list)
     instruct: List[ProteusMessage] = field(default_factory=list)
+    templates: Dict[str, str] = field(default_factory=dict)
 
 
 class ProteusLLMResponse(StructSpec, kw_only=True, frozen=True):
