@@ -1,4 +1,6 @@
-from typing import List
+from typing import List, Union
+
+import yaml
 
 from proteus.llms.base import BaseLLM
 from proteus.spec import ProteusMessage, ProteusMessagePrompt
@@ -13,6 +15,7 @@ class ProteusTeller:
     _prompt: ProteusMessagePrompt
     _history: BaseHistoryStore
     _live_history_size: int
+    _save_history: bool
 
     def __init__(
         self,
@@ -21,12 +24,14 @@ class ProteusTeller:
         prompt: ProteusMessagePrompt,
         history: BaseHistoryStore,
         live_history_size: int = 0,
+        save_history: bool = True,
     ) -> None:
         self.id = id
         self._llm = llm
         self._prompt = prompt
         self._history = history
         self._live_history_size = live_history_size
+        self._save_history = save_history
 
     def construct_prompt_msgs(
         self, new_inputs: List[ProteusMessage]
@@ -44,10 +49,16 @@ class ProteusTeller:
         new_turn = [ProteusMessage(role="user", content=user_input)]
         msgs = self.construct_prompt_msgs(new_inputs=new_turn)
         resp = self._llm.request(msgs)
-        new_turn.append(resp.message)
-        self._history.extend(self.id, new_turn)
+        if self._save_history:
+            self._history.extend(self.id, [*new_turn, resp.message])
         return resp.message.content
 
-    def say_with_template(self, user_input: str, template_name: str) -> str:
+    def say_with_template(
+        self, user_input: Union[str, dict, list], template_name: str
+    ) -> str:
+        if isinstance(user_input, str):
+            str_input = user_input
+        else:
+            str_input = yaml.dump(user_input, allow_unicode=True, sort_keys=False)
         temp_input = self._prompt.templates.get(template_name, "{input}")
-        return self.say(temp_input.format(input=user_input))
+        return self.say(temp_input.format(input=str_input))

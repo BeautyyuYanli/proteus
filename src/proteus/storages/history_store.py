@@ -10,12 +10,10 @@ from proteus.spec import ProteusMessage
 
 class BaseHistoryStore:
     @abstractmethod
-    def extend(self, session_id: str, msg: List[ProteusMessage]) -> None:
-        ...
+    def extend(self, session_id: str, msg: List[ProteusMessage]) -> None: ...
 
     @abstractmethod
-    def get_k(self, session_id: str, k: int) -> List[ProteusMessage]:
-        ...
+    def get_k(self, session_id: str, k: int) -> List[ProteusMessage]: ...
 
 
 class FakeHistoryStore(BaseHistoryStore):
